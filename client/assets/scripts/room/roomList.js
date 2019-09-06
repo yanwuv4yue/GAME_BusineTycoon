@@ -2,6 +2,7 @@ let mvs = require("Matchvs");
 let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let global = require("global");
+let sence = require("sence");
 let refreshNum = 0;
 let time;
 let firstRoomID = 0;
@@ -47,7 +48,7 @@ cc.Class({
         this.initEvent();
         this.getRooomList();
         this.returnMenu.on(cc.Node.EventType.TOUCH_END, function(){
-            cc.director.loadScene("menu");
+            cc.director.loadScene(sence.LOBBY);
         });
 
         this.firstRoom.on(cc.Node.EventType.TOUCH_END, function(){
@@ -55,7 +56,7 @@ cc.Class({
             {
                 engine.prototype.joinRoom(firstRoomID, "china");
                 global.roomID = firstRoomID;
-                cc.director.loadScene("createRoom");
+                cc.director.loadScene(sence.ROOM_CREATE);
             }
         });
     },
@@ -120,26 +121,24 @@ cc.Class({
             case msg.MATCHVS_ERROE_MSG:
                 if (eventData.errorCode === 405) {
                     console.log("房间人数已满");
-                    console.warn("房间人数已满");
                     return;
                 }
                 if (eventData.errorCode === 406) {
                     console.log("房间已joinOver");
-                    console.warn("房间已joinOver");
                     return;
                 }
                 console.log("[Err]errCode:"+eventData.errorCode+" errMsg:"+eventData.errorMsg);
-                cc.director.loadScene('login');
+                cc.director.loadScene(sence.LOGIN);
                 break;
             case msg.MATCHVS_JOIN_ROOM_RSP:
                 global.roomID = eventData.userInfoList.roomID;
                 console.log("加入指定房间成功, roomID:" +  global.roomID);
-                cc.director.loadScene('createRoom');
+                cc.director.loadScene(sence.ROOM_CREATE);
                 break;
             case msg.MATCHVS_NETWORK_STATE_NOTIFY:
                 if (eventData.netNotify.userID === global.userID && eventData.netNotify.state === 1) {
                     console.log("netNotify.userID :"+eventData.netNotify.userID +"netNotify.state: "+eventData.netNotify.state);
-                    cc.director.loadScene("login");
+                    cc.director.loadScene(sence.LOGIN);
                 }
                 break;
         }

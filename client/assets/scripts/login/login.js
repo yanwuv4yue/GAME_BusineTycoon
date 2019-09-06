@@ -1,6 +1,7 @@
 let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let global = require("global");
+let sence = require("sence");
 cc.Class({
     extends: cc.Component,
 
@@ -12,9 +13,7 @@ cc.Class({
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
-
-    start () {
+    onLoad () {
         console.log("login page...");
 
         let self = this;
@@ -26,11 +25,13 @@ cc.Class({
         // 登录按钮事件绑定
         this.loginButton.on(cc.Node.EventType.TOUCH_END, function(){
             console.log("click login button...");
-            cc.director.loadScene("menu");
+            cc.director.loadScene(sence.LOBBY);
             global.userID = Math.round(Math.random() * (this.end - this.begin) + this.begin);
             self.startLogin(global.userID, self);
         }, this);
     },
+
+    // start () {},
 
     // update (dt) {},
 
@@ -94,21 +95,25 @@ cc.Class({
     onEvent:function (event) {
         let eventData = event.data;
         switch (event.type){
+            // mvs初始化
             case msg.MATCHVS_INIT:
                 global.isInit = true;
                 break;
+            // mvs用户注册
             case msg.MATCHVS_REGISTER_USER:
                 cc.sys.localStorage.setItem(global.playerID,JSON.stringify(eventData.userInfo));
                 this.login(eventData.userInfo.id,eventData.userInfo.token);
                 break;
+            // mvs登录
             case msg.MATCHVS_LOGIN:
                 if (eventData.MsLoginRsp.roomID != null && eventData.MsLoginRsp.roomID !== '0') {
                     console.log("开始重连"+ eventData.MsLoginRsp.roomID);
                     engine.prototype.reconnect();
                 } else {
-                    cc.director.loadScene("Lobby");
+                    cc.director.loadScene(sence.LOBBY);
                 }
                 break;
+            // mvs重连
             case msg.MATCHVS_RE_CONNECT:
                 global.roomID = eventData.roomUserInfoList.roomID;
                 if (eventData.roomUserInfoList.owner === global.userID) {
@@ -119,12 +124,12 @@ cc.Class({
                 if (eventData.roomUserInfoList.state === 1) {
                     if (eventData.roomUserInfoList.roomProperty === "") {
                         engine.prototype.leaveRoom();
-                        cc.director.loadScene("Lobby");
+                        cc.director.loadScene(sence.LOBBY);
                     } else  {
-                        cc.director.loadScene('CreateRoom');
+                        cc.director.loadScene(sence.ROOM_CREATE);
                     }
                 } else {
-                    cc.director.loadScene("zyankenGame");
+                    cc.director.loadScene(sence.GAME);
                 }
                 break;
             case msg.MATCHVS_ERROE_MSG:

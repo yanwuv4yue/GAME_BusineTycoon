@@ -1,6 +1,8 @@
 let mvs = require("Matchvs");
 let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
+let sence = require("sence");
+let config = require("config");
 let global = require("global");
 cc.Class({
     extends: cc.Component,
@@ -16,9 +18,7 @@ cc.Class({
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
-
-    start () {
+    onLoad () {
         console.log("menu page...");
 
         this.initEvent();
@@ -31,7 +31,7 @@ cc.Class({
             global.syncFrame = false;
             let create = new mvs.MsCreateRoomInfo();
             create.name = 'roomName';
-            create.maxPlayer = global.MAX_PLAYER_COUNT;
+            create.maxPlayer = config.MAX_PLAYER_COUNT;
             create.mode = 0;
             create.canWatch = 0;
             create.visibility = 1;
@@ -43,9 +43,11 @@ cc.Class({
         // 查看房间列表
         this.roomList.on(cc.Node.EventType.TOUCH_END, function() {
             global.syncFrame = false;
-            cc.director.loadScene("roomList");
+            cc.director.loadScene(sence.ROOM_LIST);
         });
     },
+
+    // start () {},
 
     // update (dt) {},
     /**
@@ -71,14 +73,14 @@ cc.Class({
     onEvent (event) {
         let eventData = event.data;
         if (event.type === msg.MATCHVS_ERROE_MSG) {
-            cc.director.loadScene('login');
+            cc.director.loadScene(sence.LOGIN);
         } else if (event.type === msg.MATCHVS_CREATE_ROOM) {
             global.roomID = eventData.rsp.roomID;
-            cc.director.loadScene("createRoom");
+            cc.director.loadScene(sence.ROOM_CREATE);
         } else if (event.type === msg.MATCHVS_NETWORK_STATE_NOTIFY){
             if (eventData.netNotify.userID === global.userID && eventData.netNotify.state === 1) {
                 console.log("netNotify.userID :"+eventData.netNotify.userID +"netNotify.state: "+eventData.netNotify.state);
-                cc.director.loadScene("login");
+                cc.director.loadScene(sence.LOGIN);
             }
         }
     },

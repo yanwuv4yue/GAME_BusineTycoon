@@ -2,6 +2,7 @@ let mvs = require("Matchvs");
 let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let global = require("global");
+let sence = require("sence");
 cc.Class({
     extends: cc.Component,
 
@@ -102,7 +103,7 @@ cc.Class({
      */
     leaveRoomFunc: function() {
         global.roomID = ""
-        cc.director.loadScene('menu');
+        cc.director.loadScene(sence.LOBBY);
     },
 
     /**
@@ -165,6 +166,7 @@ cc.Class({
                 break;
             case msg.MATCHVS_ROOM_DETAIL:
                 console.log("..........", eventData.rsp);
+                global.roomOwnerID = eventData.rsp.owner;
                 this.joinRoom(eventData.rsp);
                 for (let i in eventData.rsp.userInfos) {
                     console.log("this is ", i + 1, " user ", eventData.rsp.userInfos[i].userID, "and I am", global.userID);
@@ -174,7 +176,14 @@ cc.Class({
                     }
                 }
                 break;
+            // 玩家退出房间事件
             case msg.MATCHVS_LEAVE_ROOM_NOTIFY:
+                // 若退出的玩家为房主，则其他玩家一起退出
+                if (global.roomOwnerID == eventData.leaveRoomInfo.userID)
+                {
+                    engine.prototype.leaveRoom();
+                    cc.director.loadScene(sence.LOBBY);
+                }
                 this.removeView(eventData.leaveRoomInfo)
                 break;
             case msg.MATCHVS_SEND_EVENT_NOTIFY:
@@ -185,7 +194,7 @@ cc.Class({
                 break;
             case msg.MATCHVS_ERROE_MSG:
                 if (eventData.errorCode !== 400) {
-                    cc.director.loadScene('login');
+                    cc.director.loadScene(sence.LOGIN);
                 }
                 break;
             case msg.MATCHVS_NETWORK_STATE_NOTIFY:
