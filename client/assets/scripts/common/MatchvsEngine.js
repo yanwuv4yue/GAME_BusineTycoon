@@ -47,7 +47,7 @@ MatchvsEngine.prototype.registerUser = function() {
  * @param token
  * @returns {DataView|*|number|void}
  */
-MatchvsEngine.prototype.login = function(userID,token){
+MatchvsEngine.prototype.login = function(userID, token){
     let DeviceID = 'device id info';
     let result = mvs.engine.login(userID, token, DeviceID);
     console.log("登录result"+result);
@@ -247,7 +247,7 @@ MatchvsEngine.prototype.sendFrameEvent = function (cpProto) {
 };
 
 
-    /**
+/**
  * 获取进入房间负载信息
  * @param profile
  * @returns {string}

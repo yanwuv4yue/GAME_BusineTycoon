@@ -2,6 +2,8 @@ let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let global = require("global");
 let sence = require("sence");
+
+let self;
 cc.Class({
     extends: cc.Component,
 
@@ -16,7 +18,8 @@ cc.Class({
     onLoad () {
         console.log("login page...");
 
-        let self = this;
+        self = this;
+
         this.initEvent();
 
         // 初始化mvs引擎
@@ -46,37 +49,39 @@ cc.Class({
 
     /**
      * 开始登录
-     * @param {*} key 
+     * @param {*} userID 
      * @param {*} self 
      */
-    startLogin:function(key, self){
+    startLogin:function(userID, self){
         try {
-            var userData = JSON.parse(cc.sys.localStorage.getItem(key));
-            console.log("当前缓存中用户", key, "的信息为：", userData);
-            if (userData.userID !== "") {
+            var userData = JSON.parse(cc.sys.localStorage.getItem(userID));
+            console.log("当前缓存中用户ID", userID, "的信息为：", userData);
+            if (userData != null) {
+                global.userID = userData.userID;
                 global.name = userData.name;
                 global.avatar = userData.avatar;
-                global.userID = userData.userID;
+                self.login(userID, userData.token);
             }
             else
             {
-                self.login(userData.id, userData.token);
+                // 当缓存中不存在用户信息时直接注册新的用户数据
+                engine.prototype.registerUser();
             }
         } catch (error) {
             console.warn("startLogin for error:"+error.message);
+            // 登录失败时重新注册，注册成功后回调函数会自动触发登录操作
             engine.prototype.registerUser();
         }
     },
 
     /**
      * 登录信息
-     * @param id
+     * @param userID
      * @param token
      */
-    login: function (id, token) {
-        global.userID = id;
-        console.log('开始登录...用户ID:' + id + " gameID " + global.gameID);
-        engine.prototype.login(id, token);
+    login: function (userID, token) {
+        console.log("开始登录...用户ID:", userID);
+        engine.prototype.login(userID, token);
     },
 
     /**
@@ -104,7 +109,7 @@ cc.Class({
             // mvs用户注册
             case msg.MATCHVS_REGISTER_USER:
                 cc.sys.localStorage.setItem(global.userID, JSON.stringify(eventData.userInfo));
-                this.login(eventData.userInfo.id,eventData.userInfo.token);
+                this.login(eventData.userInfo.userID, eventData.userInfo.token);
                 break;
             // mvs登录
             case msg.MATCHVS_LOGIN:
@@ -112,6 +117,7 @@ cc.Class({
                     console.log("开始重连"+ eventData.MsLoginRsp.roomID);
                     engine.prototype.reconnect();
                 } else {
+                    console.log("登录成功回调：", eventData);
                     cc.director.loadScene(sence.LOBBY);
                 }
                 break;

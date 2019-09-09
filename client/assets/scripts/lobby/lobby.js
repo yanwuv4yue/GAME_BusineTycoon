@@ -4,6 +4,9 @@ let engine = require("MatchvsEngine");
 let sence = require("sence");
 let config = require("config");
 let global = require("global");
+let common = require("common");
+
+let self;
 cc.Class({
     extends: cc.Component,
 
@@ -11,6 +14,10 @@ cc.Class({
         userID: {
             default: null,
             type: cc.Label
+        },
+        avatar: {
+            default:null,
+            type:cc.Sprite
         },
         roomCreate: cc.Node,
         roomList: cc.Node,
@@ -21,7 +28,11 @@ cc.Class({
     onLoad () {
         console.log("menu page...");
 
+        self = this;
+
         this.initEvent();
+
+        common.loadImg(self.avatar, global.avatar);
 
         this.userID.string += global.userID;
 
@@ -29,14 +40,14 @@ cc.Class({
         this.roomCreate.on(cc.Node.EventType.TOUCH_END, function() {
             console.log("roomCreate click...");
             global.syncFrame = false;
-            let create = new mvs.MsroomCreateInfo();
+            let create = new mvs.MsCreateRoomInfo();
             create.name = 'roomName';
             create.maxPlayer = config.MAX_PLAYER_COUNT;
             create.mode = 0;
             create.canWatch = 0;
             create.visibility = 1;
             console.log(create);
-            engine.prototype.roomCreate(create, "Matchvs");
+            engine.prototype.createRoom(create, "Matchvs");
             
         }, this);
 

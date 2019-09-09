@@ -81,7 +81,7 @@ MatchvsResponse.prototype.registerUserResponse = function (userInfo) {
         }
         global.avatar = userInfo.avatar;
         global.userID = userInfo.userID;
-        MatchvsResponse.prototype.sendEventToUI(msg.MATCHVS_REGISTER_USER, {userInfo:userInfo,type:msg.MATCHVS_REGISTER_USER});
+        MatchvsResponse.prototype.sendEventToUI(msg.MATCHVS_REGISTER_USER, {userInfo:userInfo, type:msg.MATCHVS_REGISTER_USER});
     } else {
         console.log("注册失败", userInfo);
     }

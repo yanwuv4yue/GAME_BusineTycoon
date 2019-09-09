@@ -3,6 +3,9 @@ let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let global = require("global");
 let sence = require("sence");
+let common = require("common");
+
+let self;
 cc.Class({
     extends: cc.Component,
 
@@ -19,27 +22,42 @@ cc.Class({
             default: null,
             type: cc.Label
         },
+        ownerAvatar: {
+            default: null,
+            type: cc.Sprite
+        },
+        player0Avatar: {
+            default: null,
+            type: cc.Sprite
+        },
+        player1Avatar: {
+            default: null,
+            type: cc.Sprite
+        },
         gameStart: cc.Node,
         leaveRoom: cc.Node,
+        // 房间内用户列表
         userList :[],
     },
 
     // LIFE-CYCLE CALLBACKS:
 
-    // onLoad () {},
-
-    start () {
+    onLoad () {
         console.log("createRoom begin...");
 
-        let self = this;
+        self = this;
 
+        // 注册监听事件
+        this.initEvent();
+
+        // 除房主以外其他人员
         this.playerViewList = [this.player0, this.player1];
+        this.playerAvatarList = [this.player0Avatar, this.player1Avatar];
 
+        // 获取当前房间信息
         if (global.roomID !== "") {
             engine.prototype.getRoomDetail(global.roomID);
         }
-
-        this.initEvent();
 
         // 游戏开始
         this.gameStart.on(cc.Node.EventType.TOUCH_END, function(){
@@ -51,6 +69,8 @@ cc.Class({
             self.leaveRoomFunc();
         });
     },
+
+    // start () {},
 
     // update (dt) {},
 
@@ -70,14 +90,18 @@ cc.Class({
         console.log("=====", info);
         if (userID === owner)
         {
-            this.owner.string = info.name;
+            this.owner.string = userID;
+            cc.loader.load(info.avatar, function (err, res) {
+                self.ownerAvatar.spriteFrame  = new cc.SpriteFrame(res);
+            });
         }
         else
         {
             for(let i = 0; i < this.playerViewList.length; i++) {
-                console.log("-----", this.playerViewList[i].string, "-----", info.name);
+                console.log("-----", this.playerViewList[i].string, "-----", userID);
                 if (this.playerViewList[i].string === "待加入") {
-                    this.playerViewList[i].string = info.name;
+                    this.playerViewList[i].string = userID;
+                    common.loadImg(this.playerAvatarList[i], info.avatar);
                     return;
                 }
             }
@@ -95,6 +119,7 @@ cc.Class({
             if(userID === this.userList[i].userID) {
                 this.userList.splice(i,1);
                 this.playerViewList[i].string = "待加入";
+                this.playerAvatarList[i].spriteFrame = null;
             }
         }
 
@@ -181,7 +206,7 @@ cc.Class({
                 global.roomOwnerID = eventData.rsp.owner;
                 this.joinRoom(eventData.rsp);
                 for (let i in eventData.rsp.userInfos) {
-                    console.log("this is ", i + 1, " user ", eventData.rsp.userInfos[i].userID, "and I am", global.userID);
+                    console.log("this is ", i + 1, " user ", eventData.rsp.userInfos[i].userID, "and I am ", global.userID, "roomOwner is ", global.roomOwnerID);
                     this.initUserView(eventData.rsp.userInfos[i].userProfile, eventData.rsp.userInfos[i].userID, eventData.rsp.owner);
                     if (global.userID !== eventData.rsp.userInfos[i].userID) {
                         this.userList.push(eventData.rsp.userInfos[i]);
