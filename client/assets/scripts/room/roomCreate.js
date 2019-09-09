@@ -41,6 +41,11 @@ cc.Class({
 
         this.initEvent();
 
+        // 游戏开始
+        this.gameStart.on(cc.Node.EventType.TOUCH_END, function(){
+            self.startGameFunc();
+        });
+
         this.leaveRoom.on(cc.Node.EventType.TOUCH_END, function(){
             engine.prototype.leaveRoom("");
             self.leaveRoomFunc();
@@ -96,6 +101,13 @@ cc.Class({
         if (userID === global.userID) {
             this.leaveRoomFunc();
         }
+    },
+
+    /**
+     * 开始游戏
+     */
+    startGameFunc: function() {
+        cc.director.loadScene(sence.GAME);
     },
 
     /**
