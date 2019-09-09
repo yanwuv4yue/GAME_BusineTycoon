@@ -12,7 +12,7 @@ cc.Class({
             default: null,
             type: cc.Label
         },
-        createRoom: cc.Node,
+        roomCreate: cc.Node,
         roomList: cc.Node,
     },
 
@@ -26,17 +26,17 @@ cc.Class({
         this.userID.string += global.userID;
 
         // 创建房间
-        this.createRoom.on(cc.Node.EventType.TOUCH_END, function() {
-            console.log("createRoom click...");
+        this.roomCreate.on(cc.Node.EventType.TOUCH_END, function() {
+            console.log("roomCreate click...");
             global.syncFrame = false;
-            let create = new mvs.MsCreateRoomInfo();
+            let create = new mvs.MsroomCreateInfo();
             create.name = 'roomName';
             create.maxPlayer = config.MAX_PLAYER_COUNT;
             create.mode = 0;
             create.canWatch = 0;
             create.visibility = 1;
             console.log(create);
-            engine.prototype.createRoom(create, "Matchvs");
+            engine.prototype.roomCreate(create, "Matchvs");
             
         }, this);
 

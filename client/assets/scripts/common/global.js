@@ -11,7 +11,6 @@ let global = {
     frameInfo: {"title" : "frameInfo"},
 
     userID: 0,
-    playerID:"",
     name: "",
     avatar: "",
     

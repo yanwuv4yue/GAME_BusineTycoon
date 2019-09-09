@@ -45,12 +45,11 @@ MatchvsResponse.prototype.bind = function () {
 
 MatchvsResponse.prototype.gameServerNotify =function (eventInfo) {
     //大概是这么写的
-        let event = new cc.Event(action,true);
-        event["data"] = eventInfo.srcUserID+eventInfo.cpProto;
-        cc.systemEvent.dispatchEvent(event);
-    
-   
+    let event = new cc.Event(action,true);
+    event["data"] = eventInfo.srcUserID+eventInfo.cpProto;
+    cc.systemEvent.dispatchEvent(event);
 }
+
 /**
  * 初始化回调
  */
@@ -72,8 +71,9 @@ MatchvsResponse.prototype.initResponse =function (status) {
 * 注册回调
 */
 MatchvsResponse.prototype.registerUserResponse = function (userInfo) {
+    console.log("注册回调");
     if (userInfo.status === 0) {
-        console.log("注册成功");
+        console.log("注册成功", userInfo);
         if (userInfo.name !== "") {
             global.name = userInfo.name;
         } else {
@@ -81,9 +81,9 @@ MatchvsResponse.prototype.registerUserResponse = function (userInfo) {
         }
         global.avatar = userInfo.avatar;
         global.userID = userInfo.userID;
-        MatchvsResponse.prototype.sendEventToUI(msg.MATCHVS_REGISTER_USER,{userInfo:userInfo,type:msg.MATCHVS_REGISTER_USER});
+        MatchvsResponse.prototype.sendEventToUI(msg.MATCHVS_REGISTER_USER, {userInfo:userInfo,type:msg.MATCHVS_REGISTER_USER});
     } else {
-        console.log("注册失败"+userInfo.status);
+        console.log("注册失败", userInfo);
     }
 };
 
@@ -377,7 +377,7 @@ let userList = new Array();
  * @param userID 执行动作的玩家
  * @param ownerID 房间的房主ID
  */
-MatchvsResponse.prototype.roomUserInfoListChangeNotify = function (data,action,player,ownerID) {
+MatchvsResponse.prototype.roomUserInfoListChangeNotify = function (data, action, player, ownerID) {
     switch (action) {
         case "joinRoom":
             userList = data;
@@ -442,8 +442,8 @@ MatchvsResponse.prototype.swapArray = function(arr, index1, index2) {
  * @param action
  * @param data
  */
-MatchvsResponse.prototype.sendEventToUI = function (action,data) {
-    let event = new cc.Event(action,true);
+MatchvsResponse.prototype.sendEventToUI = function (action, data) {
+    let event = new cc.Event(action, true);
     event["data"] = data;
     cc.systemEvent.dispatchEvent(event);
 };

@@ -25,9 +25,10 @@ cc.Class({
         // 登录按钮事件绑定
         this.loginButton.on(cc.Node.EventType.TOUCH_END, function(){
             console.log("click login button...");
-            cc.director.loadScene(sence.LOBBY);
+            // TODO 获取用户的唯一主键，用于登录操作，后续改为获取微信的openID
             global.userID = Math.round(Math.random() * (this.end - this.begin) + this.begin);
             self.startLogin(global.userID, self);
+            cc.director.loadScene(sence.LOBBY);
         }, this);
     },
 
@@ -51,15 +52,16 @@ cc.Class({
     startLogin:function(key, self){
         try {
             var userData = JSON.parse(cc.sys.localStorage.getItem(key));
-            console.log(userData);
-            if (userData.name !== "") {
+            console.log("当前缓存中用户", key, "的信息为：", userData);
+            if (userData.userID !== "") {
                 global.name = userData.name;
-            } else {
-                global.name = userData.userID;
+                global.avatar = userData.avatar;
+                global.userID = userData.userID;
             }
-            global.avatar = userData.avatar;
-            global.userID = userData.userID;
-            self.login(userData.id, userData.token);
+            else
+            {
+                self.login(userData.id, userData.token);
+            }
         } catch (error) {
             console.warn("startLogin for error:"+error.message);
             engine.prototype.registerUser();
@@ -101,7 +103,7 @@ cc.Class({
                 break;
             // mvs用户注册
             case msg.MATCHVS_REGISTER_USER:
-                cc.sys.localStorage.setItem(global.playerID,JSON.stringify(eventData.userInfo));
+                cc.sys.localStorage.setItem(global.userID, JSON.stringify(eventData.userInfo));
                 this.login(eventData.userInfo.id,eventData.userInfo.token);
                 break;
             // mvs登录
