@@ -9,10 +9,20 @@ cc.Class({
         },
 
         company: "",
-        status: ""
+        status: "",
+        picked: false
     },
 
     start() {
 
     },
+
+    onNormalSelected() {
+        let sprite = this.node.getComponent(cc.Sprite);
+        sprite.spriteFrame = null;
+    },
+
+    onDestroy() {
+        cc.log("chess node destroy!");
+    }
 });

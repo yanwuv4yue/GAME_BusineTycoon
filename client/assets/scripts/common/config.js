@@ -5,6 +5,7 @@ let config = {
     ROOM_MIN_PLAYER_COUNT: 2,
 
     CHESS_BOARD_SIZE: 10,
+    CHESS_PIECE_NUM: 6,
 
     // debug
     isDebug: true,
