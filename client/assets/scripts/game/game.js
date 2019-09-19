@@ -121,14 +121,15 @@ cc.Class({
     // 随机取棋子
     getRandomChessNode() {
         let length = this.chessNodes.length;
+        let index = parseInt(Math.random() * length, 10);
         for (let count = 0; count < length; count++) {
-            let index = parseInt(Math.random() * length, 10);
             let chessNode = this.chessNodes[index].getComponent(ChessNode);
             if (!chessNode.picked) {
                 chessNode.picked = true;
                 return chessNode.title.string;
             }
             cc.log(chessNode.title.string + " is picked!");
+            index = index + 1;
         }
         cc.log("all picked!");
         return null;
