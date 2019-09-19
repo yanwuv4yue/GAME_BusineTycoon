@@ -111,7 +111,7 @@ cc.Class({
 
                     } else {
                         let pieces = self.pieces;
-                        let piecesSize = config.CHESS_PIECE_NUM > 6 ? 6 : config.CHESS_PIECE_NUM;
+                        let piecesSize = config.CHESS_PIECE_SIZE > 6 ? 6 : config.CHESS_PIECE_SIZE;
                         let spaceX = pieces.getComponent(cc.Layout).spacingX;
                         let baseWidth = (pieces.node.getContentSize().width - spaceX * (piecesSize - 1)) / piecesSize;
                         let pieceNodeSize = new cc.size(baseWidth, baseWidth);
