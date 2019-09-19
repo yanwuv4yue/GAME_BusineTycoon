@@ -82,7 +82,7 @@ cc.Class({
                         let pieces = self.pieces;
                         let piecesSize = config.CHESS_PIECE_NUM > 6 ? 6 : config.CHESS_PIECE_NUM;
                         let spaceX = pieces.getComponent(cc.Layout).spacingX;
-                        let baseWidth = (pieces.node.getContentSize().width - spaceX * piecesSize) / piecesSize;
+                        let baseWidth = (pieces.node.getContentSize().width - spaceX * (piecesSize - 1)) / piecesSize;
                         let pieceNodeSize = new cc.size(baseWidth, baseWidth);
                         let newPieceNode = cc.instantiate(prefab);
                         newPieceNode.setContentSize(pieceNodeSize);
