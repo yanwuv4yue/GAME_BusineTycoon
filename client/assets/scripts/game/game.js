@@ -13,16 +13,47 @@ cc.Class({
 
     onLoad() {
         this.loadChessBoard()
+            .then(() => this.waitMyTurn())
             .then(() => this.addPiece())
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
-            .then(() => this.addPiece());
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
+            .then(() => this.addPiece())
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle));
     },
 
     start() {
 
+    },
+
+    // 等待我的回合
+    waitMyTurn() {
+        // TODO
+        return new Promise(function (resolve, reject) {
+            cc.log("My turn!");
+            resolve();
+        });
+    },
+
+    // 通知获得棋子
+    getPieceNotice(pieceTitle) {
+        // TODO
+        return new Promise(function (resolve, reject) {
+            cc.log("I get the piece: " + pieceTitle);
+            resolve();
+        });
+    },
+
+    // 放置棋子
+    onPieceClicked(chessNode) {
+        // TODO
+        chessNode.onNormalSelected();
     },
 
     // 加载棋盘
@@ -69,10 +100,10 @@ cc.Class({
     // 追加棋子
     addPiece() {
         var self = this;
-        // 获取随机棋子
-        let nodeTitle = self.getRandomChessNode();
-        cc.log(nodeTitle);
-        if (nodeTitle != null) {
+        // 随机取棋
+        let chessNode = self.getRandomChessNode();
+        if (chessNode != null) {
+            let chessTitle = chessNode.getComponent(ChessNode).title.string;
             return new Promise(function (resolve, reject) {
                 cc.loader.loadRes("prefab/chessNode", function (err, prefab) {
                     if (err != null) {
@@ -89,11 +120,9 @@ cc.Class({
                         newPieceNode.anchorY = 1.0;
                         // piece点击事件绑定
                         newPieceNode.on(cc.Node.EventType.TOUCH_END, function () {
-                            let chessNode = self.getChessNode(nodeTitle);
-                            if (chessNode != null) {
-                                self.onPieceClicked(chessNode.getComponent(ChessNode));
-                            }
-                            // 注销点击时间
+                            // 玩家事件
+                            self.onPieceClicked(chessNode.getComponent(ChessNode));
+                            // 注销点击事件
                             newPieceNode.off(cc.Node.EventType.TOUCH_END);
                             // 销毁节点
                             newPieceNode.destroy();
@@ -102,23 +131,17 @@ cc.Class({
                         title.node.anchorY = 1.0;
                         title.fontSize = baseWidth * 0.5;
                         title.lineHeight = baseWidth * 0.5;
-                        title.string = nodeTitle;
+                        title.string = chessTitle;
                         pieces.node.addChild(newPieceNode);
 
-                        resolve();
+                        resolve(chessTitle);
                     }
                 });
             });
         }
     },
 
-    // 玩家动作：放置棋子
-    onPieceClicked(chessNode) {
-        // TODO
-        chessNode.onNormalSelected();
-    },
-
-    // 随机取棋子
+    // 随机取棋
     getRandomChessNode() {
         let length = this.chessNodes.length;
         let index = parseInt(Math.random() * length, 10);
@@ -126,16 +149,17 @@ cc.Class({
             let chessNode = this.chessNodes[index].getComponent(ChessNode);
             if (!chessNode.picked) {
                 chessNode.picked = true;
-                return chessNode.title.string;
+                return this.chessNodes[index];
             }
             cc.log(chessNode.title.string + " is picked!");
             index = index + 1;
+            if (index >= length) index = 0;
         }
         cc.log("all picked!");
         return null;
     },
 
-    // 根据名称取棋子
+    // 获取棋子
     getChessNode(chessTitle) {
         let hashcode = common.hashCode(chessTitle);
         let length = this.chessNodes.length;
