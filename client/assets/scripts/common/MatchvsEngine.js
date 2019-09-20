@@ -206,9 +206,13 @@ MatchvsEngine.prototype.getRoomDetail = function(roomID){
     return result;
 };
 
-MatchvsEngine.prototype.sendEvent = function (msg) {
-    let data = mvs.engine.sendEvent(msg);
-    // console.log("发送信息 result"+ data.result);
+/**
+ * 发送消息
+ * @param event 消息内容 json格式 {action: msg.EVENT_GAME_START, param: [{playerId: '1234'}, {pieceId: '1234'}]}
+ */
+MatchvsEngine.prototype.sendEvent = function (event) {
+    let data = mvs.engine.sendEvent(JSON.stringify(event), false);
+    console.log("发送信息 ", event, " result", data);
     return data.result;
 };
 

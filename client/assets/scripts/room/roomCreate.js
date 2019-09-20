@@ -34,8 +34,6 @@ cc.Class({
             default: null,
             type: cc.Sprite
         },
-        gameStart: cc.Node,
-        leaveRoom: cc.Node,
         // 房间内用户列表
         userList :[],
     },
@@ -58,16 +56,6 @@ cc.Class({
         if (global.roomID !== "") {
             engine.prototype.getRoomDetail(global.roomID);
         }
-
-        // 游戏开始
-        this.gameStart.on(cc.Node.EventType.TOUCH_END, function(){
-            self.startGameFunc();
-        });
-
-        this.leaveRoom.on(cc.Node.EventType.TOUCH_END, function(){
-            engine.prototype.leaveRoom("");
-            self.leaveRoomFunc();
-        });
     },
 
     // start () {},
@@ -124,22 +112,28 @@ cc.Class({
         }
 
         if (userID === global.userID) {
-            this.leaveRoomFunc();
+            this.leaveRoom();
         }
     },
 
     /**
      * 开始游戏
      */
-    startGameFunc: function() {
+    startGame: function() {
+        // 给其他客户端发送进入游戏场景通知
+        let event = {
+            action: msg.EVENT_GAME_START
+        }
+        engine.prototype.sendEvent(event);
         cc.director.loadScene(sence.GAME);
     },
 
     /**
      * 退出房间
      */
-    leaveRoomFunc: function() {
+    leaveRoom: function() {
         global.roomID = ""
+        engine.prototype.leaveRoom("");
         cc.director.loadScene(sence.LOBBY);
     },
 
@@ -225,6 +219,7 @@ cc.Class({
                 break;
             case msg.MATCHVS_SEND_EVENT_NOTIFY:
                 let data = JSON.parse(eventData.eventInfo.cpProto);
+                console.log("┏ (゜ω゜)=☞", data)
                 if (data.action == msg.EVENT_GAME_START) {
                     this.startGame();
                 }

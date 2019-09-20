@@ -325,6 +325,7 @@ MatchvsResponse.prototype.getRoomDetailResponse = function (rsp) {
  * @param sendEventRsp
  */
 MatchvsResponse.prototype.sendEventResponse = function (sendEventRsp) {
+    console.log(sendEventRsp)
     if (sendEventRsp.status === 200) {
         MatchvsResponse.prototype.sendEventToUI(msg.MATCHVS_SEND_EVENT_RSP,{sendEventRsp,type:msg.MATCHVS_SEND_EVENT_RSP});
     } else {

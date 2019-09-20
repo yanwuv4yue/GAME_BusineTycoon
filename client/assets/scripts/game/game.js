@@ -1,3 +1,6 @@
+let mvs = require("Matchvs");
+let msg = require("MatvhvsMessage");
+let engine = require("MatchvsEngine");
 let ChessNode = require("chessNode");
 let config = require("config");
 let common = require("common");
@@ -12,6 +15,9 @@ cc.Class({
     },
 
     onLoad() {
+        // 注册监听事件
+        this.initEvent();
+
         this.loadChessBoard()
             .then(() => this.waitMyTurn())
             .then(() => this.addPiece())
@@ -30,6 +36,13 @@ cc.Class({
 
     start() {
 
+    },
+
+    /**
+     * 生命周期，销毁
+     */
+    onDestroy () {
+        this.removeEvent();
     },
 
     // 等待我的回合
@@ -54,6 +67,15 @@ cc.Class({
     onPieceClicked(chessNode) {
         // TODO
         chessNode.onNormalSelected();
+
+        // 将放置棋子动作广播给其他客户端
+        let event = {
+            action: msg.EVENT_PLAYER_CHESS_DOWN,
+            param: {
+                chessTitle: chessNode.title.string
+            }
+        }
+        engine.prototype.sendEvent(event);
     },
 
     // 加载棋盘
@@ -204,5 +226,39 @@ cc.Class({
             }
             cc.log("[" + titles + "]");
         }
-    }
+    },
+
+    /**
+     * 注册对应的事件监听和把自己的原型传递进入，用于发送事件使用
+     */
+    initEvent () {
+        cc.systemEvent.on(msg.MATCHVS_SEND_EVENT_NOTIFY, this.onEvent, this);
+    },
+
+    /**
+     * 时间接收
+     * @param event
+     */
+    onEvent (event){
+        let eventData = event.data;
+        console.log("onEvent:",eventData);
+        switch(event.type) {
+            case msg.MATCHVS_SEND_EVENT_NOTIFY:
+                let data = JSON.parse(eventData.eventInfo.cpProto);
+                if (data.action == msg.EVENT_PLAYER_CHESS_DOWN) {
+                    console.log("chess down!", data)
+                    let title = data.param.chessTitle
+                    let node = this.getChessNode(title).getComponent("chessNode")
+                    node.onNormalSelected()
+                }
+                break;
+        }
+    },
+
+    /**
+     * 移除监听
+     */
+    removeEvent() {
+        cc.systemEvent.off(msg.MATCHVS_SEND_EVENT_NOTIFY, this.onEvent);
+    },
 });
