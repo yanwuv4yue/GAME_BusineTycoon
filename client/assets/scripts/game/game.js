@@ -2,6 +2,7 @@ let mvs = require("Matchvs");
 let msg = require("MatvhvsMessage");
 let engine = require("MatchvsEngine");
 let ChessNode = require("chessNode");
+let PieceNode = require("pieceNode");
 let config = require("config");
 let common = require("common");
 
@@ -19,7 +20,6 @@ cc.Class({
         this.initEvent();
 
         this.loadChessBoard()
-            .then(() => this.waitMyTurn())
             .then(() => this.addPiece())
             .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
@@ -41,17 +41,8 @@ cc.Class({
     /**
      * 生命周期，销毁
      */
-    onDestroy () {
+    onDestroy() {
         this.removeEvent();
-    },
-
-    // 等待我的回合
-    waitMyTurn() {
-        // TODO
-        return new Promise(function (resolve, reject) {
-            cc.log("My turn!");
-            resolve();
-        });
     },
 
     // 通知获得棋子
@@ -97,8 +88,6 @@ cc.Class({
                             let newNode = cc.instantiate(prefab);
                             newNode.setContentSize(chessNodeSize);
                             let title = newNode.getComponent(ChessNode).title;
-                            title.fontSize = baseWidth * 0.5;
-                            title.lineHeight = baseWidth * 0.5;
                             title.string = self.getColumnTitle(i) + (j + 1);
 
                             let hashcode = common.hashCode(title.string);
@@ -127,7 +116,7 @@ cc.Class({
         if (chessNode != null) {
             let chessTitle = chessNode.getComponent(ChessNode).title.string;
             return new Promise(function (resolve, reject) {
-                cc.loader.loadRes("prefab/chessNode", function (err, prefab) {
+                cc.loader.loadRes("prefab/pieceNode", function (err, prefab) {
                     if (err != null) {
                         reject(err);
 
@@ -139,8 +128,6 @@ cc.Class({
                         let pieceNodeSize = new cc.size(baseWidth, baseWidth);
                         let newPieceNode = cc.instantiate(prefab);
                         newPieceNode.setContentSize(pieceNodeSize);
-                        newPieceNode.anchorY = 1.0;
-                        // piece点击事件绑定
                         newPieceNode.on(cc.Node.EventType.TOUCH_END, function () {
                             // 玩家事件
                             self.onPieceClicked(chessNode.getComponent(ChessNode));
@@ -149,10 +136,7 @@ cc.Class({
                             // 销毁节点
                             newPieceNode.destroy();
                         });
-                        let title = newPieceNode.getComponent(ChessNode).title;
-                        title.node.anchorY = 1.0;
-                        title.fontSize = baseWidth * 0.5;
-                        title.lineHeight = baseWidth * 0.5;
+                        let title = newPieceNode.getComponent(PieceNode).title;
                         title.string = chessTitle;
                         pieces.node.addChild(newPieceNode);
 
@@ -231,7 +215,7 @@ cc.Class({
     /**
      * 注册对应的事件监听和把自己的原型传递进入，用于发送事件使用
      */
-    initEvent () {
+    initEvent() {
         cc.systemEvent.on(msg.MATCHVS_SEND_EVENT_NOTIFY, this.onEvent, this);
     },
 
@@ -239,10 +223,10 @@ cc.Class({
      * 时间接收
      * @param event
      */
-    onEvent (event){
+    onEvent(event) {
         let eventData = event.data;
-        console.log("onEvent:",eventData);
-        switch(event.type) {
+        console.log("onEvent:", eventData);
+        switch (event.type) {
             case msg.MATCHVS_SEND_EVENT_NOTIFY:
                 let data = JSON.parse(eventData.eventInfo.cpProto);
                 if (data.action == msg.EVENT_PLAYER_CHESS_DOWN) {

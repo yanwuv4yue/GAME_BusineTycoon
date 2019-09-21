@@ -8,6 +8,11 @@ cc.Class({
             type: cc.Label
         },
 
+        background: {
+            default: null,
+            type: cc.Sprite
+        },
+
         company: "",
         status: "",
         picked: false
@@ -18,8 +23,7 @@ cc.Class({
     },
 
     onNormalSelected() {
-        let sprite = this.node.getComponent(cc.Sprite);
-        sprite.spriteFrame = null;
+        this.background.spriteFrame = null;
     },
 
     onDestroy() {
