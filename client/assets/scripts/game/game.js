@@ -31,7 +31,10 @@ cc.Class({
             .then(() => this.addPiece())
             .then((pieceTitle) => this.getPieceNotice(pieceTitle))
             .then(() => this.addPiece())
-            .then((pieceTitle) => this.getPieceNotice(pieceTitle));
+            .then((pieceTitle) => this.getPieceNotice(pieceTitle))
+            .catch(err => {
+                cc.log("err => " + err);
+            });
     },
 
     start() {
@@ -70,80 +73,62 @@ cc.Class({
     },
 
     // 加载棋盘
-    loadChessBoard() {
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            cc.loader.loadRes("prefab/chessNode", function (err, prefab) {
-                if (err != null) {
-                    reject(err);
+    async loadChessBoard() {
+        let prefab = await common.loadRes("prefab/chessNode");
+        let chessBoardSize = config.CHESS_BOARD_SIZE > 10 ? 10 : config.CHESS_BOARD_SIZE;
+        let baseWidth = this.board.node.getContentSize().width / chessBoardSize;
+        let chessNodeSize = new cc.size(baseWidth, baseWidth);
+        // cc.log("ChessNode Size: " + chessNodeSize);
+        for (let i = 0; i < chessBoardSize; i++) {
+            for (let j = 0; j < chessBoardSize; j++) {
+                let newNode = cc.instantiate(prefab);
+                newNode.setContentSize(chessNodeSize);
+                let title = newNode.getComponent(ChessNode).title;
+                title.string = this.getColumnTitle(i) + (j + 1);
 
-                } else {
-                    let board = self.board;
-                    let chessBoardSize = config.CHESS_BOARD_SIZE > 10 ? 10 : config.CHESS_BOARD_SIZE;
-                    let baseWidth = board.node.getContentSize().width / chessBoardSize;
-                    let chessNodeSize = new cc.size(baseWidth, baseWidth);
-                    cc.log("ChessNode Size: " + chessNodeSize);
-                    for (let i = 0; i < chessBoardSize; i++) {
-                        for (let j = 0; j < chessBoardSize; j++) {
-                            let newNode = cc.instantiate(prefab);
-                            newNode.setContentSize(chessNodeSize);
-                            let title = newNode.getComponent(ChessNode).title;
-                            title.string = self.getColumnTitle(i) + (j + 1);
-
-                            let hashcode = common.hashCode(title.string);
-                            let length = chessBoardSize * chessBoardSize;
-                            let index = hashcode % length;
-                            while (self.chessNodes[index] != null) {
-                                index = index + 1;
-                                if (index >= length) index = 0;
-                            }
-                            self.chessNodes[index] = newNode;
-                            board.node.addChild(newNode);
-                        }
-                    }
-                    // self.logChessNodes();
-                    resolve();
+                let hashcode = common.hashCode(title.string);
+                let length = chessBoardSize * chessBoardSize;
+                let index = hashcode % length;
+                while (this.chessNodes[index] != null) {
+                    index = index + 1;
+                    if (index >= length) index = 0;
                 }
-            });
-        });
+                this.chessNodes[index] = newNode;
+                this.board.node.addChild(newNode);
+            }
+        }
+        // self.logChessNodes();
+        return Promise.resolve();
     },
 
     // 追加棋子
-    addPiece() {
-        var self = this;
+    async addPiece() {
         // 随机取棋
-        let chessNode = self.getRandomChessNode();
+        let chessNode = this.getRandomChessNode();
         if (chessNode != null) {
             let chessTitle = chessNode.getComponent(ChessNode).title.string;
-            return new Promise(function (resolve, reject) {
-                cc.loader.loadRes("prefab/pieceNode", function (err, prefab) {
-                    if (err != null) {
-                        reject(err);
+            let prefab = await common.loadRes("prefab/pieceNode");
+            let piecesSize = config.CHESS_PIECE_SIZE > 6 ? 6 : config.CHESS_PIECE_SIZE;
+            let spaceX = this.pieces.getComponent(cc.Layout).spacingX;
+            let baseWidth = (this.pieces.node.getContentSize().width - spaceX * (piecesSize - 1)) / piecesSize;
+            let pieceNodeSize = new cc.size(baseWidth, baseWidth);
+            let newPieceNode = cc.instantiate(prefab);
+            newPieceNode.setContentSize(pieceNodeSize);
 
-                    } else {
-                        let pieces = self.pieces;
-                        let piecesSize = config.CHESS_PIECE_SIZE > 6 ? 6 : config.CHESS_PIECE_SIZE;
-                        let spaceX = pieces.getComponent(cc.Layout).spacingX;
-                        let baseWidth = (pieces.node.getContentSize().width - spaceX * (piecesSize - 1)) / piecesSize;
-                        let pieceNodeSize = new cc.size(baseWidth, baseWidth);
-                        let newPieceNode = cc.instantiate(prefab);
-                        newPieceNode.setContentSize(pieceNodeSize);
-                        newPieceNode.on(cc.Node.EventType.TOUCH_END, function () {
-                            // 玩家事件
-                            self.onPieceClicked(chessNode.getComponent(ChessNode));
-                            // 注销点击事件
-                            newPieceNode.off(cc.Node.EventType.TOUCH_END);
-                            // 销毁节点
-                            newPieceNode.destroy();
-                        });
-                        let title = newPieceNode.getComponent(PieceNode).title;
-                        title.string = chessTitle;
-                        pieces.node.addChild(newPieceNode);
-
-                        resolve(chessTitle);
-                    }
-                });
+            let self = this;
+            newPieceNode.on(cc.Node.EventType.TOUCH_END, function () {
+                // 玩家事件
+                self.onPieceClicked(chessNode.getComponent(ChessNode));
+                // 注销点击事件
+                newPieceNode.off(cc.Node.EventType.TOUCH_END);
+                // 销毁节点
+                newPieceNode.destroy();
             });
+            let title = newPieceNode.getComponent(PieceNode).title;
+            title.string = chessTitle;
+            this.pieces.node.addChild(newPieceNode);
+
+            return Promise.resolve(chessTitle);
         }
     },
 

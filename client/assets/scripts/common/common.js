@@ -18,7 +18,21 @@ export const hashCode = (str) => {
 	return h;
 }
 
+// 动态加载资源
+export const loadRes = (path) => {
+	return new Promise(function (resolve, reject) {
+		cc.loader.loadRes(path, function (err, res) {
+			if (err != null) {
+				return reject(err);
+			} else {
+				return resolve(res);
+			}
+		});
+	});
+}
+
 export default {
 	loadImg,
-	hashCode
+	hashCode,
+	loadRes
 }
